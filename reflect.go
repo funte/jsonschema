@@ -1116,7 +1116,7 @@ func (t *Schema) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t.Extras == nil || len(t.Extras) == 0 {
+	if len(t.Extras) == 0 {
 		return b, nil
 	}
 	var m []byte
@@ -1171,14 +1171,4 @@ func splitOnUnescapedCommas(tagString string) []string {
 
 func fullyQualifiedTypeName(t reflect.Type) string {
 	return t.PkgPath() + "." + t.Name()
-}
-
-// AddGoComments will update the reflectors comment map with all the comments
-// found in the provided source directories. See the #ExtractGoComments method
-// for more details.
-func (r *Reflector) AddGoComments(base, path string) error {
-	if r.CommentMap == nil {
-		r.CommentMap = make(map[string]string)
-	}
-	return ExtractGoComments(base, path, r.CommentMap)
 }
