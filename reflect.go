@@ -106,6 +106,9 @@ type Reflector struct {
 	// default of requiring any key *not* tagged with `json:,omitempty`.
 	RequiredFromJSONSchemaTags bool
 
+	// Manual require specific struct required.
+	Require func(reflect.StructField) bool
+
 	// Do not reference definitions. This will remove the top-level $defs map and
 	// instead cause the entire structure of types to be output in one tree. The
 	// list of type definitions (`$defs`) will not be included.
@@ -1028,10 +1031,15 @@ func (r *Reflector) reflectFieldName(f reflect.StructField) (string, bool, bool,
 	}
 
 	var required bool
-	if !r.RequiredFromJSONSchemaTags {
-		requiredFromJSONTags(jsonTags, &required)
+	if r.Require != nil {
+		// Manual require.
+		required = r.Require(f)
+	} else {
+		if !r.RequiredFromJSONSchemaTags {
+			requiredFromJSONTags(jsonTags, &required)
+		}
+		requiredFromJSONSchemaTags(schemaTags, &required)
 	}
-	requiredFromJSONSchemaTags(schemaTags, &required)
 
 	nullable := nullableFromJSONSchemaTags(schemaTags)
 
